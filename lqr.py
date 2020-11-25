@@ -98,6 +98,16 @@ def train(T: int,
         pbar.update(bsde_it + policy_it)
         if count_updates > max_updates:
             break
+    result = {"state":fbsde.state_dict()}
+    torch.save(result, os.path.join(base_dir, "result.pth.tar"))
+
+def visualize(T,
+        n_steps,
+        ffn_hidden,
+        base_dir,
+        sigma):
+    return 0
+
 
 
 if __name__=='__main__':
