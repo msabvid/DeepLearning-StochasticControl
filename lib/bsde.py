@@ -11,6 +11,24 @@ from lib.functions import Func, Hamiltonian
 class FBSDE(nn.Module):
 
     def __init__(self, d: int, ffn_hidden: List[int], drift: Func, diffusion: Func, running_cost: Func, final_cost: Func):
+        """
+        Initialisation of the FBSDE that we want to solve.
+        
+        Paramters
+        ---------
+        d: int
+            dim of the process
+        ffn_hidden: List[int]
+            hidden sizes of the Feedforward networks that parametrise the policy, Y, Z
+        drift: Func
+            Drift of the controlled process. 
+        diffusion: Func
+            Diffusion of the controlled process
+        running_cost: Func
+            Running cost of the control
+        final_cost: Func
+            Final cost of the control
+        """
         super().__init__()
         self.d = d
 
@@ -58,6 +76,7 @@ class FBSDE(nn.Module):
     
     def bsdeint(self, ts: torch.Tensor, x0: torch.Tensor): 
         """
+        Local errors at each timestep in timegrid ts to solve the BSDE
         Parameters
         ----------
         ts: troch.Tensor
@@ -99,7 +118,7 @@ class FBSDE(nn.Module):
                         z=z,
                         create_graph=True,
                         retain_graph=True)
-                pred = y - dHdx*h + stoch_int 
+                pred = y - dHdx*h + stoch_int # euler timestep
                 target = Y[:,idx+1,:].detach()
             loss += loss_fn(pred, target)
         return loss
@@ -107,6 +126,8 @@ class FBSDE(nn.Module):
     
     def loss_policy(self, ts: torch.Tensor, x0: torch.Tensor):
         """ 
+        We want to find
+        - argmin_{a} H(t,X,Y,Z,a) for all t
         Parameters
         ----------
         ts: troch.Tensor
