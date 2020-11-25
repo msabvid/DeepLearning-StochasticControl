@@ -176,7 +176,7 @@ class QuadraticRunningCost(Func):
         aDa = torch.bmm(a.unsqueeze(1),Da) # (batch_size, 1, 1)
         Fa = torch.matmul(self.F, a.unsqueeze(2)) # (batch_size, d, 1)
         xFa = torch.bmm(x.unsqueeze(1),Fa) # (batch_size, 1, 1)
-        return xCx + aDa + 2*xFa
+        return (xCx + aDa + 2*xFa).squeeze(2)
 
     def dx(self,x):
         pass
