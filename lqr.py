@@ -103,11 +103,61 @@ def train(T: int,
 
 def visualize(T,
         n_steps,
+        d: int,
         ffn_hidden,
         base_dir,
         sigma):
-    return 0
+    import matplotlib.animation as animation
+    import matplotlib.pyplot as plt
+    assert d==2, "visualization only implemented for 2-dimensional control problem"
+    device="cpu"
+    # create model
+    coefs_lqr = CoefsLQR(sigma=sigma, d=d, device=device)
+    drift_lqr = Drift_linear(L=coefs_lqr.L, M=coefs_lqr.M)
+    diffusion_lqr = Diffusion_constant(sigma=coefs_lqr.sigma)
+    running_cost = QuadraticRunningCost(C=coefs_lqr.C,D=coefs_lqr.D,F=coefs_lqr.F)
+    final_cost = QuadraticFinalCost(R=coefs_lqr.R)
 
+    fbsde = FBSDE(d=d, 
+            ffn_hidden=ffn_hidden, 
+            drift=drift_lqr, 
+            diffusion=diffusion_lqr, 
+            running_cost=running_cost,
+            final_cost=final_cost)
+    fbsde.to(device)
+    checkpoint = torch.load(os.path.join(base_dir, "result.pth.tar"), map_location="cpu")
+    fbsde.load_state_dict(checkpoint["state"])
+    ts = torch.linspace(0, T, n_steps+1, device=device)
+    
+    x0 = sample_x0(batch_size=10,d=d, device=device)
+    x0 = torch.tensor([[-1.5,-1.5],[-1.5,1.5],[1.5,1.5],[1.5,-1.5]], dtype=torch.float32)
+    with torch.no_grad():
+        x, _ = fbsde.sdeint(ts, x0)
+    x = x.numpy()
+    
+    # visualization
+    fig = plt.figure()
+    ax1 = plt.axes(xlim=(-2, 2), ylim=(-2,2))
+    line, = ax1.plot([],[],"o-")
+    lines = []
+    colors = ['blue','red','grey','green']
+    for i in range(4):
+        obj = ax1.plot([],[],"o-",color=colors[i])[0]
+        lines.append(obj)
+    def init():
+        for line in lines:
+            line.set_data([],[])
+        return lines
+    def animate(i):
+        for lnum, line in enumerate(lines):
+            line.set_data(x[lnum, :i+1,0],x[lnum, :i+1, 1])
+        return lines
+    anim = animation.FuncAnimation(fig, animate, init_func=init,
+                               frames=len(ts), interval=10)
+    anim.save(os.path.join(base_dir, "trajectories.mp4")) 
+    anim.save(os.path.join(base_dir, "trajectories.gif"), dpi=80, writer='imagemagick') 
+
+    return 0
 
 
 if __name__=='__main__':
@@ -144,14 +194,22 @@ if __name__=='__main__':
     if not os.path.exists(results_path):
         os.makedirs(results_path)
     
-    train(T=args.T,
-            n_steps=args.n_steps,
-            d=args.d,
-            ffn_hidden=args.ffn_hidden,
-            max_updates=args.max_updates,
-            batch_size=args.batch_size,
-            base_dir=results_path,
-            device=device,
-            sigma=args.sigma,
-            bsde_it=args.bsde_it,
-            policy_it=args.policy_it)
+    if args.visualize:
+        visualize(T=args.T,
+                n_steps=args.n_steps,
+                d=args.d,
+                ffn_hidden=args.ffn_hidden,
+                base_dir=results_path,
+                sigma=args.sigma)
+    else:
+        train(T=args.T,
+                n_steps=args.n_steps,
+                d=args.d,
+                ffn_hidden=args.ffn_hidden,
+                max_updates=args.max_updates,
+                batch_size=args.batch_size,
+                base_dir=results_path,
+                device=device,
+                sigma=args.sigma,
+                bsde_it=args.bsde_it,
+                policy_it=args.policy_it)
