@@ -142,7 +142,7 @@ def visualize(T,
     lines = []
     colors = ['blue','red','grey','green']
     for i in range(4):
-        obj = ax1.plot([],[],"o-",color=colors[i])[0]
+        obj = ax1.plot([],[],".-",color=colors[i], alpha=0.5 )[0]
         lines.append(obj)
     def init():
         for line in lines:
