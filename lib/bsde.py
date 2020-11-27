@@ -94,7 +94,7 @@ class FBSDE(nn.Module):
         t = ts.reshape(1,-1,1).repeat(batch_size,1,1)
         tx = torch.cat([t,x],2)
         
-        Y = self.Y(tx) # (batch_size, L, 2)
+        Y = self.Y(tx) # (batch_size, L, dim)
         Z = self.Z(tx) # (batch_size, L, dim)
 
         loss_fn = nn.MSELoss()
