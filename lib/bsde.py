@@ -96,7 +96,6 @@ class FBSDE(nn.Module):
         
         Y = self.Y(tx) # (batch_size, L, 2)
         Z = self.Z(tx).view(batch_size, len(ts), self.d, self.d) # (batch_size, L, d, d)
-
         loss_fn = nn.MSELoss()
         loss = 0
         for idx,t in enumerate(ts):
