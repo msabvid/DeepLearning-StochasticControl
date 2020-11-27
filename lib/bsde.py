@@ -108,7 +108,8 @@ class FBSDE(nn.Module):
                 current_t = t*torch.ones(batch_size, 1, device=device)
                 y = Y[:,idx,:]
                 tx = torch.cat([current_t, x[:,idx,:]],1)
-                a = self.alpha(tx)
+                with torch.no_grad():
+                    a = self.alpha(tx)
                 z = Z[:,idx,:]
                 stoch_int = torch.sum(Z[:,idx,:]*brownian_increments[:,idx,:], 1, keepdim=True)
                 dHdx = self.H.dx(t=current_t, 
