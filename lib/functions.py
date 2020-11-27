@@ -92,12 +92,14 @@ class Hamiltonian(Func):
         y: torch.Tensor
             Adjoint state. Tensor of shape (batch_size, dim)
         z: torch.Tensor
-            Diffusion in adjoint process. Tensor of shape (batch_size, dim)
+            Diffusion in adjoint process. Tensor of shape (batch_size, dim, dim)
         Note
         ----
         I'm considering the diffuion of the SDE to be diagonal
         """
-        H = torch.sum(self.drift(t,x,a)*y,1,keepdim=True) + torch.sum(self.diffusion(t,x,a)*z, 1, keepdim=True) + self.running_cost(x,a) 
+        diffusion_z = torch.bmm(self.diffusion(t,x,a).unsqueeze(1), z) # (batch_size,1,d). I'm considering the diffusion to be diagonal!
+        trace_diffusion_z = torch.sum(diffusion_z, 2) # (batch_size, 1) 
+        H = torch.sum(self.drift(t,x,a)*y,1,keepdim=True) + trace_diffusion_z + self.running_cost(x,a) 
         return H #(batch_size, 1)
     
     
