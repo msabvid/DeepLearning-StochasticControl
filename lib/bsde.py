@@ -94,7 +94,7 @@ class FBSDE(nn.Module):
         t = ts.reshape(1,-1,1).repeat(batch_size,1,1)
         tx = torch.cat([t,x],2)
         
-        Y = self.Y(tx) # (batch_size, L, 1)
+        Y = self.Y(tx) # (batch_size, L, 2)
         Z = self.Z(tx) # (batch_size, L, dim)
 
         loss_fn = nn.MSELoss()
@@ -111,7 +111,8 @@ class FBSDE(nn.Module):
                 with torch.no_grad():
                     a = self.alpha(tx)
                 z = Z[:,idx,:]
-                stoch_int = torch.sum(Z[:,idx,:]*brownian_increments[:,idx,:], 1, keepdim=True)
+                #stoch_int = torch.sum(Z[:,idx,:]*brownian_increments[:,idx,:], 1, keepdim=True)
+                stoch_int = Z[:,idx,:]*brownian_increments[:,idx,:]
                 dHdx = self.H.dx(t=current_t, 
                         x=x[:,idx,:],
                         a=a,
