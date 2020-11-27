@@ -144,7 +144,7 @@ class FBSDE(nn.Module):
         t = ts.reshape(1,-1,1).repeat(batch_size,1,1)
         tx = torch.cat([t,x],2)
         with torch.no_grad():
-            Y = self.Y(tx) # (batch_size, L, 1)
+            Y = self.Y(tx) # (batch_size, L, d)
             Z = self.Z(tx).view(batch_size, len(ts), self.d, self.d) # (batch_size, L, d, d)
         
         loss = 0
