@@ -40,7 +40,7 @@ class FBSDE(nn.Module):
         
         self.alpha = FFN(sizes = [d+1] + ffn_hidden + [d]) # +1 is for time
         self.Y = FFN(sizes = [d+1] + ffn_hidden + [d]) # Adjoint state. +1 is for time
-        self.Z = FFN(sizes = [d+1] + ffn_hidden + [d]) # Diffusion of adjoint BSDE
+        self.Z = FFN(sizes = [d+1] + ffn_hidden + [d*d]) # Diffusion of adjoint BSDE
         self.H = Hamiltonian(drift = self.drift, diffusion=self.diffusion, running_cost=self.running_cost)
 
     
@@ -62,7 +62,7 @@ class FBSDE(nn.Module):
         x = x0.unsqueeze(1)
         batch_size = x.shape[0]
         device = x.device
-        brownian_increments = torch.zeros(batch_size, len(ts), self.d, device=device)
+        brownian_increments = torch.zeros(batch_size, len(ts), self.d, device=device) # (batch_size, L, d)
         for idx, t in enumerate(ts[1:]):
             h = ts[idx+1]-ts[idx]
             current_t = t*torch.ones(batch_size, 1, device=device)
@@ -95,7 +95,7 @@ class FBSDE(nn.Module):
         tx = torch.cat([t,x],2)
         
         Y = self.Y(tx) # (batch_size, L, 2)
-        Z = self.Z(tx) # (batch_size, L, dim)
+        Z = self.Z(tx).view(batch_size, len(ts), self.d, self.d) # (batch_size, L, d, d)
 
         loss_fn = nn.MSELoss()
         loss = 0
@@ -112,7 +112,7 @@ class FBSDE(nn.Module):
                     a = self.alpha(tx)
                 z = Z[:,idx,:]
                 #stoch_int = torch.sum(Z[:,idx,:]*brownian_increments[:,idx,:], 1, keepdim=True)
-                stoch_int = Z[:,idx,:]*brownian_increments[:,idx,:]
+                stoch_int = torch.bmm(Z[:,idx,...], brownian_increments[:,idx,:].unsqueeze(1)).squeeze(2) # (batch_size, d)
                 dHdx = self.H.dx(t=current_t, 
                         x=x[:,idx,:],
                         a=a,
