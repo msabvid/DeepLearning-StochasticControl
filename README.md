@@ -11,3 +11,8 @@ Algorithm:
 <p align="center">
 <img align="middle" src="./numerical_results/trajectories.gif" alt="LQR" width="300" height="250" />
 </p>
+
+
+## TODO
+
+Code is loopy. The bsde solver and the Hamiltonian should be vectorized across time. 
