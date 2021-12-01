@@ -1,6 +1,8 @@
 # Infinite horizon time LQR problem solved with Deep Learning and Dynamic Programming
 See `lqr_infinite_horizon.ipnyb`
 
+TODO: add entropy in the value function to add exploration. (We have to know the whole distribution!)
+
 # Finite Horizon time Stochastic Control solved using Deep Learning
 We solve the control problem, by minimising J
 ![](/images_readme/control_problem.png)
