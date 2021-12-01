@@ -4,6 +4,8 @@ See `lqr_infinite_horizon.ipnyb`
 TODO: add entropy in the value function to add exploration. (We have to know the whole distribution!)
 
 # Finite Horizon time Stochastic Control solved using Deep Learning
+See `lqr.py`.
+
 We solve the control problem, by minimising J
 ![](/images_readme/control_problem.png)
 where g is convex. The policy alpha is parametrised with a neural network, and we use Method of successive approximations on Pontryagin Maximum principle. 
