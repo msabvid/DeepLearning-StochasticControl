@@ -1,4 +1,4 @@
-# Stochastic Control solved using Deep Learning
+# Finite time Stochastic Control solved using Deep Learning
 We solve the control problem, by minimising J
 ![](/images_readme/control_problem.png)
 where g is convex. The policy alpha is parametrised with a neural network, and we use Method of successive approximations on Pontryagin Maximum principle. 
@@ -16,3 +16,7 @@ Algorithm:
 ## TODO
 
 Code is loopy. The bsde solver and the Hamiltonian should be vectorized across time. 
+
+
+# Infinite horizon time LQR problem solved with Deep Learning and Dynamic Programming
+See `lqr_infinite_horizon.ipnyb`
