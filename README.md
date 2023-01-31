@@ -15,6 +15,9 @@ Algorithm:
 3. Update policy by maximising Hamiltonian (analog to Q-learning on model-free RL)
 4. Go back to 2.
 
+## Example
+Drunk agents trying to reach the origin (aka LQR: dX_t = a_t dt + dW_t, with running cost f(x,a) = a^2, and final cost g(x) = x^2)
+
 <p align="center">
 <img align="middle" src="./numerical_results/trajectories.gif" alt="LQR" width="300" height="250" />
 </p>
